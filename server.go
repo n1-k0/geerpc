@@ -125,12 +125,14 @@ func (server *Server) handleRequest(cc codec.Codec, req *request, sending *sync.
 }
 
 func (server *Server) Accept(lis net.Listener) {
+	fmt.Println("listen")
 	for {
 		conn, err := lis.Accept()
 		if err != nil {
 			log.Println("rpc server: accept error:", err)
 			return
 		}
+
 		go server.ServeConn(conn)
 	}
 }
