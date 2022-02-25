@@ -48,7 +48,7 @@ type service struct {
 	method map[string]*methodType //存储映射的结构体的所有符合条件的方法
 }
 
-func newService(rcvr interface{}) *service { //rcvr为映射为服务的结构体实例
+func newService(rcvr interface{}) *service { //rcvr: 映射为服务的结构体实例
 	s := new(service)
 	s.rcvr = reflect.ValueOf(rcvr)
 	s.name = reflect.Indirect(s.rcvr).Type().Name()
