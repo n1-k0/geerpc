@@ -50,9 +50,11 @@ type service struct {
 
 func newService(rcvr interface{}) *service { //rcvr: 映射为服务的结构体实例
 	s := new(service)
-	s.rcvr = reflect.ValueOf(rcvr)
-	s.name = reflect.Indirect(s.rcvr).Type().Name()
-	s.typ = reflect.TypeOf(rcvr)
+	s.rcvr = reflect.ValueOf(rcvr) // 函数指针指向的地址(0xc0000142c8)
+
+	s.name = reflect.Indirect(s.rcvr).Type().Name() //地址上的值（main.Foo）的名字（Foo）
+	s.typ = reflect.TypeOf(rcvr)                    //（*main.Foo）
+	// fmt.Println("s.rcvr", s.rcvr, reflect.Indirect(s.rcvr).Type(), s.name, s.typ)
 	if !ast.IsExported(s.name) {
 		log.Fatalf("rpc server: %s is not a valid service name", s.name)
 	}
@@ -67,11 +69,13 @@ func isExportedOrBuiltinType(t reflect.Type) bool {
 func (s *service) registerMethods() {
 	s.method = make(map[string]*methodType)
 	for i := 0; i < s.typ.NumMethod(); i++ {
-		method := s.typ.Method(i)
-		mType := method.Type
+		method := s.typ.Method(i) //(Sum)
+		mType := method.Type      //
+		// fmt.Println(method, mType)
 		if mType.NumIn() != 3 || mType.NumOut() != 1 {
 			continue
-		}
+		} //1.两个导出或内置类型的入参（反射时为 3 个，第 0 个是自身，类似于 python 的 self，java 中的 this）
+		//2.返回值有且只有 1 个，类型为 error
 		if mType.Out(0) != reflect.TypeOf((*error)(nil)).Elem() {
 			continue
 		}
